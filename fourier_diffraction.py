@@ -40,6 +40,15 @@ def calcSigmaUmip(kineticEnergy = 80*10**3):
 #writing a new version of fourierPropogate which uses values 
 #more close to unity and not include any physical constants
 def fourierPropogateDumb(grating, wavefunc = False, pad = .7):
+    """
+    grating: array which represents in nanometers the thickness of the grating
+
+    wavefunc: boolean that if true makes this function return a complex
+    wavefunction instead of an intensity array
+
+    pad: fraction that determines how much bigger the array becomes after padding
+    set to 0 for no padding
+    """
     #padding because that is what the old gods requested
     padlength = int(grating.shape[0] * pad)
     padGrating = np.pad(grating, [padlength, padlength], mode='constant', constant_values=0)
