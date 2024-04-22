@@ -46,6 +46,10 @@ def oneDimensionBlazed(nx,periodPix,thickness,depth,period,fracPos):
     
     return xarr, gratingArr
 
+def oneDimArbitrary(function,nx,periodPix,thickness,depth,period):
+    
+    pass
+
 #The mismatch of period, pixel number, and length, leads to beating in the modulus 
 #fixed in the new blazed grating function
 # #alternatively you could use fourier coefficients to define these grating profiles
