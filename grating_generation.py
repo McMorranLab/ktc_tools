@@ -29,7 +29,7 @@ def oneDimensionBlazed(nx,periodPix,thickness,depth,period,fracPos):
     xarr : xaxis, defining the hologram
     thickness : thickness of the silicon nitride grating
     depth : maximum depth of the grating to be milled
-    period : self evident
+    period : in microns
     fracPos : fraction of the grating with a positive slope
     """
     #set our length to mesh nicely with the pre defined values above

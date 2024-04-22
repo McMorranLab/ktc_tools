@@ -36,6 +36,16 @@ def calcSigmaUmip(kineticEnergy = 80*10**3):
         
     return sigmaUmip #in units of rad / m 
 
+#determine what depth of SiNx is needed to achieve the desired phase shift
+def radiansToDepth(radians,KE):
+    """
+    radians: the desired phase shift in radians
+    KE: the kinetic energy in eV to do the calculation for
+    """
+    sigUmip = fd.calcSigmaUmip(KE) *1E-9 #now in rad/nm
+    #returns depth of SiNx in nanometers
+    return radians / sigUmip
+
 #with all the wisdom and knowledge ive gained in the past year
 #writing a new version of fourierPropogate which uses values 
 #more close to unity and not include any physical constants
