@@ -42,7 +42,7 @@ def radiansToDepth(radians,KE):
     radians: the desired phase shift in radians
     KE: the kinetic energy in eV to do the calculation for
     """
-    sigUmip = fd.calcSigmaUmip(KE) *1E-9 #now in rad/nm
+    sigUmip = calcSigmaUmip(KE) *1E-9 #now in rad/nm
     #returns depth of SiNx in nanometers
     return radians / sigUmip
 

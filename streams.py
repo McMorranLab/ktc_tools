@@ -4,6 +4,8 @@ from matplotlib import pyplot as plt
 #function for generating array of beam locations and on/off status of the beam at each location
 #I should add a part that controls the dwell time too
 def binaryStreamGen(hologram,xstride,ystride,xStreamfilePix,yStreamfilePix):
+
+
     
     xStartind = 0
     yStartind = 0
@@ -12,9 +14,22 @@ def binaryStreamGen(hologram,xstride,ystride,xStreamfilePix,yStreamfilePix):
     ymax = hologram.shape[1]
     
     xArray, yArray = np.meshgrid(np.linspace(0,xmax,xmax),np.linspace(0,ymax,ymax))
+
+
+    #define this array so it occurs in the center of the screen 
+    #these values come from the FIB manual
+    xdirStreamPixels = 65536
+    ydirStreamPixels = 56576
+    midpointX = xdirStreamPixels / 2
+    midpointY = ydirStreamPixels / 2
+    xmaxStream = midpointX + round(xStreamfilePix/2)
+    xminStream = midpointX - round(xStreamfilePix/2)
+    ymaxStream = midpointY + round(yStreamfilePix/2)
+    yminStream = midpointY - round(yStreamfilePix/2)
+
     #arrays with values of the actual streamfile coordinates to use
-    xStreamFileArray,yStreamFileArray = np.meshgrid(np.linspace(0,xStreamfilePix,xmax)\
-                                                   ,np.linspace(0,yStreamfilePix,ymax))
+    xStreamFileArray,yStreamFileArray = np.meshgrid(np.linspace(xminStream,xmaxStream,xmax)\
+                                                   ,np.linspace(yminStream,ymaxStream,ymax))
     
     streamlist = []
     ylast = 0
