@@ -31,9 +31,6 @@ def binaryStreamGen(hologram,xstride,ystride,xStreamfilePix,yStreamfilePix):
     
     streamlist = []
     ylast = 0
-    
-    #more debugging
-    print(xmax,ymax)
 
     #loop through hologram skipping points according to how far apart you want your beam locations
     for j in range(yStartind,ymax,ystride):
