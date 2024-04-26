@@ -1,6 +1,10 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
+#these values come from the FIB manual
+xdirStreamPixels = 65536
+ydirStreamPixels = 56576
+
 #function for generating array of beam locations and on/off status of the beam at each location
 #I should add a part that controls the dwell time too
 def binaryStreamGen(hologram,xstride,ystride,xStreamfilePix,yStreamfilePix):
@@ -8,16 +12,12 @@ def binaryStreamGen(hologram,xstride,ystride,xStreamfilePix,yStreamfilePix):
     xStartind = 0
     yStartind = 0
     
-    xmax = hologram.shape[0]
-    ymax = hologram.shape[1]
+    xmax = hologram.shape[1]
+    ymax = hologram.shape[0]
     
-    yArray, xArray = np.meshgrid(np.linspace(0,xmax,xmax),np.linspace(0,ymax,ymax))
-
+    xArray, yArray = np.meshgrid(np.linspace(0,xmax,xmax),np.linspace(0,ymax,ymax),indexing = 'ij')
 
     #define this array so it occurs in the center of the screen 
-    #these values come from the FIB manual
-    xdirStreamPixels = 65536
-    ydirStreamPixels = 56576
     midpointX = xdirStreamPixels / 2
     midpointY = ydirStreamPixels / 2
     xmaxStream = midpointX + round(xStreamfilePix/2)
@@ -26,33 +26,34 @@ def binaryStreamGen(hologram,xstride,ystride,xStreamfilePix,yStreamfilePix):
     yminStream = midpointY - round(yStreamfilePix/2)
 
     #arrays with values of the actual streamfile coordinates to use
-    yStreamFileArray, xStreamFileArray = np.meshgrid(np.linspace(xminStream,xmaxStream,xmax)\
-                                                   ,np.linspace(yminStream,ymaxStream,ymax))
+    xStreamFileArray, yStreamFileArray = np.meshgrid(np.linspace(xminStream,xmaxStream,xmax)\
+                                                   ,np.linspace(yminStream,ymaxStream,ymax),\
+                                                    indexing = "ij")
     
     streamlist = []
     ylast = 0
 
     #loop through hologram skipping points according to how far apart you want your beam locations
-    for j in range(yStartind,ymax,ystride):
-        for i in range(xStartind,xmax,xstride):
+    for i in range(xStartind,xmax-xstride,xstride):
+        for j in range(yStartind,ymax-ystride,ystride):
 
             #check if beam location is on hologram
-            if hologram[i,j] >= 1:
+            if hologram[j,i] >= 1:
                 
                 #determine whether to keep the beam on or not
                 #if the beam is moving over a large region without points turn off
-                ydiff = np.abs(ylast - yArray[j,i])
+                ydiff = np.abs(ylast - yArray[i,j])
 
                 #if the current y val is too far from the last y val turn off the beam 
                 #for the last streampoint
-                if ydiff > 4*ystride and streamlist != []:
+                if ydiff > 2*ystride and streamlist != []:
                     streamlist[-1][2] = 0
                     
-                ylast = yArray[j,i]
+                ylast = yArray[i,j]
                 
                 #add streampoint to the list
-                xStreamPoint = xStreamFileArray[j,i]
-                yStreamPoint = yStreamFileArray[j,i]
+                xStreamPoint = xStreamFileArray[i,j]
+                yStreamPoint = yStreamFileArray[i,j]
                 streamlist.append([xStreamPoint,yStreamPoint,1])
                 
     #repeat the last point
@@ -147,7 +148,7 @@ Dwell_time3 x_coord3 y_coord3 beam_con
 #     print("all done!")
     
     
-def streamConversions(hfw,millDens,gratingLength,calcRes):
+def streamConversions(hfw,millDens,gratingLength,calcRes,yDir = False):
     """
     hfw: Half Field Width in microns
     millDens: milling points per micron
@@ -158,8 +159,18 @@ def streamConversions(hfw,millDens,gratingLength,calcRes):
     millSpacing: number of grating array pixels that seperate mill points
     lengthPix: width of grating in streamfile pixels
     """
+    #since we work in a rectangular box, the y direction needs to be handled 
+    #differently than the xdirection
+    if yDir == True:
+        hfw = ydirStreamPixels  * hfw / xdirStreamPixels
+
     #find the pixel resolution of the fib at whatever magnification we are at
-    xpointspacing =  65536 / hfw #in units of pixels / micron
+    xpointspacing =  xdirStreamPixels/ hfw #in units of pixels / micron
+
+    #don't allow the user to define a testgrid larger than the hfw
+    if gratingLength > hfw:
+        raise Exception("grating too large for current hfw!")
+        
     #use thaat pixel resolution and the mill point density to find the pixel spacing between mill points
     pointMillSpacing = (1 / millDens) * (xpointspacing) #now has units of pixels / mill point
     #determine how many streamfile pixels across our grating will be
@@ -167,12 +178,11 @@ def streamConversions(hfw,millDens,gratingLength,calcRes):
     #take the array resolution and the test area size in pixels to find the pixel resolution
     #of the grating arrays
     xGratPix  = lengthPix / calcRes
-    yGratPix  = lengthPix / calcRes
     #finally calculate how many array pixels each mill spacing corresponds to 
     millSpacing = int(np.round(pointMillSpacing/xGratPix))
     
     print("each returned array pixel represents")
-    print(xGratPix,"by",yGratPix, "streamfile pixels\n")
+    print(xGratPix, "streamfile pixels\n")
     print("mill point spacing values in streamfile pixels")
     print(pointMillSpacing,"\n")
     print("the mill points will be seperated by ")
