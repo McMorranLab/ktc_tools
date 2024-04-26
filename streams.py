@@ -5,15 +5,13 @@ from matplotlib import pyplot as plt
 #I should add a part that controls the dwell time too
 def binaryStreamGen(hologram,xstride,ystride,xStreamfilePix,yStreamfilePix):
 
-
-    
     xStartind = 0
     yStartind = 0
     
     xmax = hologram.shape[0]
     ymax = hologram.shape[1]
     
-    xArray, yArray = np.meshgrid(np.linspace(0,xmax,xmax),np.linspace(0,ymax,ymax))
+    yArray, xArray = np.meshgrid(np.linspace(0,xmax,xmax),np.linspace(0,ymax,ymax))
 
 
     #define this array so it occurs in the center of the screen 
@@ -28,22 +26,26 @@ def binaryStreamGen(hologram,xstride,ystride,xStreamfilePix,yStreamfilePix):
     yminStream = midpointY - round(yStreamfilePix/2)
 
     #arrays with values of the actual streamfile coordinates to use
-    xStreamFileArray,yStreamFileArray = np.meshgrid(np.linspace(xminStream,xmaxStream,xmax)\
+    yStreamFileArray, xStreamFileArray = np.meshgrid(np.linspace(xminStream,xmaxStream,xmax)\
                                                    ,np.linspace(yminStream,ymaxStream,ymax))
     
     streamlist = []
     ylast = 0
     
+    #more debugging
+    print(xmax,ymax)
+
     #loop through hologram skipping points according to how far apart you want your beam locations
-    for i in range(xStartind,xmax,xstride):
-        for j in range(yStartind,ymax,ystride):
-    
+    for j in range(yStartind,ymax,ystride):
+        for i in range(xStartind,xmax,xstride):
+
             #check if beam location is on hologram
-            if hologram[j,i] >= 1:
+            if hologram[i,j] >= 1:
                 
                 #determine whether to keep the beam on or not
                 #if the beam is moving over a large region without points turn off
                 ydiff = np.abs(ylast - yArray[j,i])
+
                 #if the current y val is too far from the last y val turn off the beam 
                 #for the last streampoint
                 if ydiff > 4*ystride and streamlist != []:
