@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import matplotlib.cm as cm
 
 #these values come from the FIB manual
 xdirStreamPixels = 65536
@@ -236,3 +237,59 @@ def sliceStream(folder,baseName,\
         streamName = baseName + '{:02d}'.format(i) + ".str"
         #create streamfile 
         generateStreamFile(layerStream,passPerLayer,dwellTime,folder + streamName)
+
+#split a stream array for a grid of gratings into a list of stream arrays, where each element 
+#of the list is a different grating in the grid
+def streamGridSplit(streamArray,spacingWidthRatio,spacingHeightRatio,streamLengthX,streamLengthY,\
+                    numCol,numRow):
+    """
+    streamArray:stream array representing the grid we would like to split
+    spacingWidthRatio: ratio of spacing between gratings, to total width of the grid
+    spacingHeightRatio: ratio of spacing between gratings, to total height of the grid
+    streamLengthX: total streamfile pixels in x dir
+    streamLengthY: total streamfile pixels in y dir
+    numCol: number of columns in our grid
+    numRow: number of rows in our grid
+    """
+    
+    #find the spacing width in streamfile pixels
+    streamXSpacingPix = spacingWidthRatio * (streamLengthX)
+    streamYSpacingPix = spacingHeightRatio * (streamLengthY)
+
+    #find the test size in streamfile pixels
+    streamTestXPix = (streamLengthX - (numCol - 1)*streamXSpacingPix)/numCol
+    streamTestYPix = (streamLengthY - (numRow -1)*streamYSpacingPix)/numRow
+
+    #find the bottom left corner of the streamfile array
+    xOrigin = np.amin(streamArray[:,0])
+    yOrigin = np.amin(streamArray[:,1])
+
+    #this is to color all of our arrays differently to verify that they were
+    #correctly seperated
+    colors = iter(cm.nipy_spectral(np.linspace(0, 1, numCol*numRow)))
+
+    chunklist = []
+    #loop through all the arrays
+    for i in range(numCol):
+        for j in range(numRow):
+
+            #apply the limit to the right side
+            lessThanX = streamArray[:,0] <= xOrigin + i*(streamTestXPix + streamXSpacingPix)\
+                                                    +  streamTestXPix + streamXSpacingPix/2
+            chunkArr1 = streamArray[lessThanX]
+            #apply the limit to the left side
+            greaterThanX = chunkArr1[:,0] >= xOrigin + i*(streamTestXPix + streamXSpacingPix)
+            chunkArr2 = chunkArr1[greaterThanX]
+            #apply limit to the top
+            lessThanY = chunkArr2[:,1] <= yOrigin + j*(streamTestYPix + streamYSpacingPix)\
+                                                + streamTestYPix + streamYSpacingPix/2
+            chunkArr3 = chunkArr2[lessThanY]
+            #apply limit to the bottom
+            greaterThanY = chunkArr3[:,1] >= yOrigin + j*(streamTestYPix + streamYSpacingPix)
+            chunkArr4 = chunkArr3[greaterThanY]
+            chunklist.append(chunkArr4)
+            
+            #visualize the chunks with different colors
+            plt.scatter(chunkArr4[:,0],chunkArr4[:,1],s = .1,color=next(colors))
+
+    return chunklist
