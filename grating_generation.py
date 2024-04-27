@@ -6,7 +6,7 @@ import scipy
 #and generates 2 nx by ny arrays that encode the x coordinates and the y coordinates
 #for many gratings this is the fundamental object that is manipulated to create the desired shapes
 def generateCoordinates(xLength,yLength,nx,ny):
-    xArray, yArray = np.meshgrid(np.linspace(0,xLength,nx),np.linspace(0,yLength,ny))
+    xArray, yArray = np.meshgrid(np.linspace(0,xLength,nx),np.linspace(0,yLength,ny),indexing='xy')
     return xArray, yArray
 
 #this takes in a single coordinate array i.e. x or y
@@ -58,3 +58,44 @@ def oneDimArbitrary(function,nx,periodPix,thickness,depth,period):
 #     output = depth  * np.mod(coordArray / period,1)
 #     return output
 
+#given a grating array, generate a grid of evenly spaced copies of that
+#grating. I can imagine a future functionality where this function can take in a 
+#list of gratings, and arranges them into a grid pattern, but thats for the future
+def genGratingGrid(gratingArray,rowNum,colNum,spacing,\
+                   horzSize,vertSize):
+    """
+    gratingArray: Input grating we wish to make grid out of
+    horzSize: real space width of gratingArray
+    vertSize: real space height of gratingArray
+    spacing: real space spacing between gratings in the grid
+    rowNum: how many rows you want in the final grating grid
+    colNum: how many columns you want in the final grating grid
+    """
+
+    ny = gratingArray.shape[0]
+    nx = gratingArray.shape[1]
+    #convert real space distances to pixels 
+    spacingHorzPixels = round(spacing / (horzSize / nx))
+    spacingVertPixels = round(spacing / (vertSize / ny))
+    #create the generic spacing arrays we will append between grating arrays
+    spacingArrayHorz = np.full((spacingVertPixels, nx),0)
+    spacingArrayVert = np.full((ny + spacingVertPixels,spacingHorzPixels),0)
+
+    #create a row of evenly spaced grating arrays with a 
+    #spacer on the bottom
+    rowArr = np.append(spacingArrayHorz,gratingArray,axis = 0)
+    for i in range(colNum-1):
+        newArr1 = np.append(rowArr,spacingArrayVert ,axis = 1)
+        newArr2 = np.append(spacingArrayHorz, gratingArray,axis = 0)
+        rowArr = np.append(newArr1,newArr2,axis = 1)
+
+    #append each row of arrays into a total array
+    oldRowArr = rowArr
+    for j in range(rowNum-1):
+        oldRowArr = np.append(oldRowArr,rowArr,axis = 0)
+
+    #remove top spacer for subindexing to be easier at a later point
+    testArr = oldRowArr[spacingHorzPixels:,:]
+
+    #give back the array 
+    return testArr

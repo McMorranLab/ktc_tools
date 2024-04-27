@@ -163,9 +163,11 @@ def streamConversions(hfw,millDens,gratingLength,calcRes,yDir = False):
     #differently than the xdirection
     if yDir == True:
         hfw = ydirStreamPixels  * hfw / xdirStreamPixels
-
-    #find the pixel resolution of the fib at whatever magnification we are at
-    xpointspacing =  xdirStreamPixels/ hfw #in units of pixels / micron
+        #get the y pixel resolution
+        xpointspacing = ydirStreamPixels / hfw
+    else:
+        #find the pixel resolution of the fib at whatever magnification we are at
+        xpointspacing =  xdirStreamPixels/ hfw #in units of pixels / micron
 
     #don't allow the user to define a testgrid larger than the hfw
     if gratingLength > hfw:
