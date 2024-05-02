@@ -189,8 +189,8 @@ def streamConversions(hfw,millDens,gratingLength,calcRes,yDir = False):
     print("mill point spacing values in streamfile pixels")
     print(pointMillSpacing,"\n")
     print("the mill points will be seperated by ")
-    print(millSpacing, " pixels in the returned arrays\n")
-     
+    print(millSpacing, " pixels in the returned arrays\n")    
+    
     return millSpacing, lengthPix
 
 def sliceCalculations(depth,layerNum,nmPerPass):

@@ -12,8 +12,17 @@ def generateCoordinates(xLength,yLength,nx,ny):
 #this takes in a single coordinate array i.e. x or y
 #a desired depth and desired period and applys a square wave 
 #across the given array
-def oneDimensionBinary(coordArray,depth,period):
-    output = depth/2 * (scipy.signal.square(2 * np.pi  * coordArray / period) + 1)
+def oneDimensionBinary(coordArray,depth,period,duty = 1):
+    """
+    coordArray: 2d array from generateCoordinates representing the x or y axis
+    depth: the value you want the peaks of the square wave to have
+    period: the period you want the square wave to have
+    duty: the fraction of the square wave peak that will remain
+    """
+    
+    periodicX = np.mod(coordArray,period)
+    output = np.where(periodicX < period*duty/2,depth,0)
+
     return output
 
 def oneDimensionSin(coordArray,depth,period):
