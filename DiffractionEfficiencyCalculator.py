@@ -1,4 +1,5 @@
 #%% #to allow notebook style development in VSCode
+
 from ktc_tools import grating_generation as ggen
 from ktc_tools import fourier_diffraction as fd
 from matplotlib import pyplot as plt
@@ -8,37 +9,40 @@ import numpy as np
 
 """The code for a binary grating
 """
-# xlength = 10 #microns
-# n = 500
+xlength = 30 #microns
+n = 1000
 
-# period = .2 #100 nanometers
-# depth = 20.75
-# padlength = int(n * .2)
+period = .2 #100 nanometers
+depth = 20.75
+padlength = int(n * .2)
 
-# #create a grating of arbitrary depth to diffract the electron beam and create
-# # multiple probes
-# xarr, yarr = ggen.generateCoordinates(xlength,xlength,n,n)
+#create a grating of arbitrary depth to diffract the electron beam and create
+# multiple probes
+xarr, yarr = ggen.generateCoordinates(xlength,xlength,n,n)
 
-# gratingArr = ggen.oneDimensionBinary(xarr,depth,period)
+gratingArr = ggen.oneDimensionBinary(xarr,depth,period)
 
 """The code for a blazed grating
 """
-n = 1000
-period = .2 #microns
-depth = 20.88 #in nanometers
-padlength = int(n * .2)
+########################################
+# n = 1000
+# period = .2 #microns
+# depth = 20.88 #in nanometers
+# padlength = int(n * .2)
 
-##parameters for new style of grating generation
-thickness = 50
-pixPerPeriod = n * .02
-fracPos = .13
+# ##parameters for new style of grating generation
+# thickness = 50
+# pixPerPeriod = n * .02
+# fracPos = .13
 
-#define a blazed grating and an array of x-coordinates to match it
-xarr , gratingArr = ggen.oneDimensionBlazed(n, pixPerPeriod, thickness,\
-                                             depth, period, fracPos)
+# #define a blazed grating and an array of x-coordinates to match it
+# xarr , gratingArr = ggen.oneDimensionBlazed(n, pixPerPeriod, thickness,\
+#                                              depth, period, fracPos)
 
-#pull the xlength implicitly from the xarray defined by ggen
-xlength = xarr[-1,-1]
+# #pull the xlength implicitly from the xarray defined by ggen
+# xlength = xarr[-1,-1]
+
+##############################################
 
 fig,ax = plt.subplots()
 ax.set_title("Grating Array")
