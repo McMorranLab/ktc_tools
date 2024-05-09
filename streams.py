@@ -190,7 +190,7 @@ def streamConversions(hfw,millDens,gratingLength,calcRes,yDir = False):
     print(pointMillSpacing,"\n")
     print("the mill points will be seperated by ")
     print(millSpacing, " pixels in the returned arrays\n")    
-    
+
     return millSpacing, lengthPix
 
 def sliceCalculations(depth,layerNum,nmPerPass):
@@ -237,6 +237,39 @@ def sliceStream(folder,baseName,\
         streamName = baseName + '{:02d}'.format(i) + ".str"
         #create streamfile 
         generateStreamFile(layerStream,passPerLayer,dwellTime,folder + streamName)
+
+
+#this function is a copy of sliceStream but has the altered behavior of returning
+#a list of stream arrays as opposed to saving streamfiles to a directory
+#this is being written for use in generating a test grid of blazed gratings
+#but I suspect it will be generically very useful in the future. 
+def sliceStreamList(numLayers,thickness,depth,nmPerPass,\
+                    gratingArr,gratSpacing,lengthPix):
+    
+    dh, passPerLayer = sliceCalculations(depth,numLayers,nmPerPass)
+
+    streamList = []
+    counter = 0
+    
+    for i in range(1,numLayers):
+    
+        layerArr = np.copy(gratingArr)
+        layerArr[gratingArr+i*dh > thickness] = 0
+        layerArr[gratingArr+i*dh <= thickness] = 1
+
+        #generate the stream array and add to our list
+        layerStream = binaryStreamGen(layerArr,gratSpacing,gratSpacing,lengthPix,lengthPix)
+
+        if not layerStream.any():
+            counter +=1
+            print("skipped empty layer: ",counter)
+            continue
+        
+        streamList.append(layerStream)
+        plotStreams(layerStream)
+
+    #return a list of stream Arrays representing the slices of our grating
+    return streamList
 
 #split a stream array for a grid of gratings into a list of stream arrays, where each element 
 #of the list is a different grating in the grid

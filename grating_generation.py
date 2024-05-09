@@ -71,7 +71,7 @@ def oneDimArbitrary(function,nx,periodPix,thickness,depth,period):
 #grating. I can imagine a future functionality where this function can take in a 
 #list of gratings, and arranges them into a grid pattern, but thats for the future
 def genGratingGrid(gratingArray,rowNum,colNum,spacing,\
-                   horzSize,vertSize):
+                   horzSize,vertSize,spacerValue = 0):
     """
     gratingArray: Input grating we wish to make grid out of
     horzSize: real space width of gratingArray
@@ -87,8 +87,8 @@ def genGratingGrid(gratingArray,rowNum,colNum,spacing,\
     spacingHorzPixels = round(spacing / (horzSize / nx))
     spacingVertPixels = round(spacing / (vertSize / ny))
     #create the generic spacing arrays we will append between grating arrays
-    spacingArrayHorz = np.full((spacingVertPixels, nx),0)
-    spacingArrayVert = np.full((ny + spacingVertPixels,spacingHorzPixels),0)
+    spacingArrayHorz = np.full((spacingVertPixels, nx),spacerValue)
+    spacingArrayVert = np.full((ny + spacingVertPixels,spacingHorzPixels),spacerValue)
 
     #create a row of evenly spaced grating arrays with a 
     #spacer on the bottom
