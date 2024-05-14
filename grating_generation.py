@@ -55,9 +55,39 @@ def oneDimensionBlazed(nx,periodPix,thickness,depth,period,fracPos):
     
     return xarr, gratingArr
 
-def oneDimArbitrary(function,nx,periodPix,thickness,depth,period):
+#takes in a one dimensional function, and generates a 2d grating with that function as the 
+#depth profile
+def oneDimensionArbitrary(xFunction,nx,periodPix,thickness,depth,period,otherParams = []):
+    """
+    xFunction: Function which we only need to input the x axis into
+    nx = number of pixels total in 1d
+    periodPix = number of pixels per a period
+    thickness : thickness of the silicon nitride grating
+    depth : maximum depth of the grating to be milleda
+    period : microns
+    otherParams: optional list of other parameters to pass to xFunction
+    """
     
-    pass
+    #set our length to mesh nicely with the pre defined values above
+    length = (nx -1)/ periodPix * period 
+    print("array length in microns: ",length)
+    #define a coordinate array for the x-axis
+    xarr,yarr = ggen.generateCoordinates(length,length,nx,nx)
+
+    #apply the function to the calculated x array
+    paramList = [thickness,depth,period]
+    gratingArr = xFunction(xarr,paramList)
+    
+    return xarr, gratingArr
+
+def optTrip(x,paramList):
+    thickness = paramList[0]
+    depth = paramList[1]
+    period = paramList[2]
+    
+    a = 2.65718
+    height = 1.211 #this depends on a and was found using desmos
+    return thickness - depth * ((np.arctan(a * np.sin(x * np.pi * 2 / period)) + height) / (height*2))
 
 #The mismatch of period, pixel number, and length, leads to beating in the modulus 
 #fixed in the new blazed grating function
