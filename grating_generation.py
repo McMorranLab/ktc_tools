@@ -72,7 +72,7 @@ def oneDimensionArbitrary(xFunction,nx,periodPix,thickness,depth,period,otherPar
     length = (nx -1)/ periodPix * period 
     print("array length in microns: ",length)
     #define a coordinate array for the x-axis
-    xarr,yarr = ggen.generateCoordinates(length,length,nx,nx)
+    xarr,yarr = generateCoordinates(length,length,nx,nx)
 
     #apply the function to the calculated x array
     paramList = [thickness,depth,period]

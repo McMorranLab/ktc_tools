@@ -200,7 +200,7 @@ def sliceCalculations(depth,layerNum,nmPerPass):
     nmPerPass: experimental value gathered through depthTesting
     """
     
-    dh = depth / layerNum
+    dh = depth / (layerNum+1)
     print("deltaH (nm): ",dh)
     passPerLayer = round(dh / nmPerPass)
     print("Passes / Layer: ", passPerLayer)
@@ -243,10 +243,10 @@ def sliceStream(folder,baseName,\
 #a list of stream arrays as opposed to saving streamfiles to a directory
 #this is being written for use in generating a test grid of blazed gratings
 #but I suspect it will be generically very useful in the future. 
-def sliceStreamList(numLayers,thickness,depth,nmPerPass,\
-                    gratingArr,gratSpacing,lengthPix):
+def sliceStreamList(numLayers,thickness,depth,\
+                    gratingArr,gratSpacing,xLengthPix,yLengthPix):
     
-    dh, passPerLayer = sliceCalculations(depth,numLayers,nmPerPass)
+    dh = depth / (numLayers + 1)
 
     streamList = []
     counter = 0
@@ -258,7 +258,7 @@ def sliceStreamList(numLayers,thickness,depth,nmPerPass,\
         layerArr[gratingArr+i*dh <= thickness] = 1
 
         #generate the stream array and add to our list
-        layerStream = binaryStreamGen(layerArr,gratSpacing,gratSpacing,lengthPix,lengthPix)
+        layerStream = binaryStreamGen(layerArr,gratSpacing,gratSpacing,xLengthPix,yLengthPix)
 
         if not layerStream.any():
             counter +=1
