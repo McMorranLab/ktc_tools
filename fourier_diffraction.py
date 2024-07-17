@@ -224,7 +224,7 @@ def calcDiffractionEfficiencies(intensity, xlength):
 
 def normalizeWavefunc(wavefunc):
     magnitude = np.abs(wavefunc)**2
-    normFactor = np.sqrt(np.trapz(np.trapz(magnitude,axis = 0)))
+    normFactor = np.sqrt(np.sum(magnitude))
     normalizedWavefunc = wavefunc / normFactor
     
     return normalizedWavefunc

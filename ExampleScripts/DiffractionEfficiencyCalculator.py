@@ -10,7 +10,7 @@ import numpy as np
 """The code for a binary grating
 """
 xlength = 30 #microns
-n = 1000
+n = 2000
 
 period = .2 #100 nanometers
 depth = 20.75

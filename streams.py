@@ -246,7 +246,7 @@ def sliceStream(folder,baseName,\
 def sliceStreamList(numLayers,thickness,depth,\
                     gratingArr,gratSpacing,xLengthPix,yLengthPix):
     
-    dh = depth / (numLayers + 1)
+    dh = depth / (numLayers + 2)
 
     streamList = []
     counter = 0
