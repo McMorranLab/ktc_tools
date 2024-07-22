@@ -252,7 +252,7 @@ def sliceStreamList(numLayers,thickness,depth,\
     counter = 0
   
     for i in range(1,numLayers+1):
-
+        print("layer number : ", i )
         layerArr = np.copy(gratingArr)
         layerArr[gratingArr+i*dh > thickness] = 0
         layerArr[gratingArr+i*dh <= thickness] = 1
