@@ -225,7 +225,7 @@ def calcDiffractionEfficiencies(intensity, xlength):
 
 #this function takes in a 1d periodic curve defining a grating, and calculates the 
 #fourier coefficients of the curve in each diffraction order
-def gratingCoefficients(function1d,pixPerPeriod):
+def gratingCoefficientsFFT(function1d,pixPerPeriod):
     """"
     function1d: 1d periodic array of y values
     pixPerPeriod: user defined when defining function 1d
