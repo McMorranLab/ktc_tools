@@ -222,6 +222,39 @@ def calcDiffractionEfficiencies(intensity, xlength):
     
     return xaxis, efficiencies
 
+
+#this function takes in a 1d periodic curve defining a grating, and calculates the 
+#fourier coefficients of the curve in each diffraction order
+def gratingCoefficients(function1d,pixPerPeriod):
+    """"
+    function1d: 1d periodic array of y values
+    pixPerPeriod: user defined when defining function 1d
+
+    orderCoefficients: the fourier coefficients of said periodic curve where 
+    orderCoefficient[m] is the mth fourier coefficient of function1d
+    orderLabels: an array of the same length as orderCoefficients for labeling plots
+    """
+
+    #extract n and use it to define the frequency domain
+    n = function1d.shape[0]
+    frequencies = np.fft.fftfreq(n)
+    
+    #rescale the frequency domain so that each diffraction order 
+    #is represented by an integer
+    orderArray = frequencies*pixPerPeriod
+    #extract indices where the diffraction orders are located 
+    orderIndices = np.where(orderArray % 1 == 0)[0]
+    #extract order labels
+    orderLabels = orderArray[orderIndices]
+
+    fourierTransform = np.fft.fft(function1d) #fft
+    normFourierFunc = normalizeWavefunc(fourierTransform) #normalize
+
+    #extract the efficienies for each diffraction order
+    orderCoefficients = normFourierFunc[orderIndices]
+
+    return orderCoefficients, orderLabels
+
 def normalizeWavefunc(wavefunc):
     magnitude = np.abs(wavefunc)**2
     normFactor = np.sqrt(np.sum(magnitude))
