@@ -27,6 +27,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import scipy.special
 import os
 import time
+import math
 
 """
 This block of functions are used to extract the maps s_j(n) that are of a specified order ranked and sorted by their contribution j.
@@ -293,14 +294,14 @@ def LP(x,m,p):
         return lpm[p]
 
 
-# def LG(X, Y, m, p, waist, phs=0):
-#     #This function generates the X-Y cross section of a laguerre gauss beam at some z
-#     R = numpy.sqrt((X ** 2 + Y ** 2))*numpy.sqrt(2)/waist
-#     phi = numpy.arctan2(Y, X)
+def LG(X, Y, m, p, waist, phs=0):
+    #This function generates the X-Y cross section of a laguerre gauss beam at some z
+    R = numpy.sqrt((X ** 2 + Y ** 2))*numpy.sqrt(2)/waist
+    phi = numpy.arctan2(Y, X)
 
-#     return (numpy.sqrt(2*numpy.math.factorial(p)/(numpy.pi*numpy.math.factorial(p+abs(m)))) *
-#             R**numpy.abs(m)*numpy.exp(-R**2/2)*LP(R**2,numpy.abs(m),p)/waist *
-#             numpy.exp(-1.j * (m * phi + phs)))
+    return (numpy.sqrt(2*math.factorial(p)/(numpy.pi*math.factorial(p+abs(m)))) *
+            R**numpy.abs(m)*numpy.exp(-R**2/2)*LP(R**2,numpy.abs(m),p)/waist *
+            numpy.exp(-1.j * (m * phi + phs)))
 
 #needs some development to work
 # def LG(X ,Y ,m ,n ,w0 = .003 * mm):

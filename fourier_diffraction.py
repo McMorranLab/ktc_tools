@@ -63,7 +63,7 @@ def fourierPropogateDumb(grating, wavefunc = False, pad = .7):
     padlength = int(grating.shape[0] * pad)
     padGrating = np.pad(grating, [padlength, padlength], mode='constant', constant_values=0)
     #find fourier transform of transmission function, now (0,0) is at center of grid in frequency space
-    fourierTrans = np.fft.fftshift(np.fft.fft2(padGrating))
+    fourierTrans = np.fft.fftshift(np.fft.fft2(np.fft.ifftshift(padGrating)))
     #do some transformations to get back into real space
     intensity = np.abs(fourierTrans)**2
     
