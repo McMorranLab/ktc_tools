@@ -2,6 +2,20 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
 
+import grating_generation as ggen
+
+## STREAM FILE FORMATTING
+# beam_con 1 for beam on, 0 for beam off, nothing for don't change beam_con
+"""
+1st line: s16e
+2nd line: number of passes
+3rd line: number of points
+4th line and rest:
+Dwell_time1 x_coord1 y_coord1 beam_con
+Dwell_time2 x_coord2 y_coord2 
+Dwell_time3 x_coord3 y_coord3 beam_con
+"""
+    
 #these values come from the FIB manual
 xdirStreamPixels = 65536
 ydirStreamPixels = 56576
@@ -119,36 +133,46 @@ def generateStreamFile(streamArray,numPasses,dwellTime,fileLoc):
     
     return None
 
-## STREAM FILE FORMATTING
-# beam_con 1 for beam on, 0 for beam off, nothing for don't change beam_con
-"""
-1st line: s16e
-2nd line: number of passes
-3rd line: number of points
-4th line and rest:
-Dwell_time1 x_coord1 y_coord1 beam_con
-Dwell_time2 x_coord2 y_coord2 
-Dwell_time3 x_coord3 y_coord3 beam_con
-"""
-
-# #this function takes a list of streamfile names all within the same folder
-# #and it writes an autoscript file to run all the streamfiles in order
-#useless since we can't use autoscripts on fib2 without some expensive software
-# def basicAutoscript(streamNameList,fileLoc):
+#function that takes in FIB parameters for a binary grating and generates a streamfile
+def binaryGratingStreamfile(hfw, dwellTime, passNumber, dStep,\
+                        gratPeriod, gratLength, saveFolder):
+    """
+    hfw: the half field width milling should happen at in microns
+    dwellTime: the dwellTime to use for each point
+    passNumber: the number of milling passed that the streamfile will specify
+    dStep: the distance between milling points in microns
+    gratPeriod: the period of the binary grating in microns
+    gratLength: the size of the grating to be made in microns
+    saveFolder: the location you wish to save the streamfile in ending in a backslash so 
+        that it may be added to the automatically generated file name
+    """
     
-#     f = open(fileLoc,"w+")
+    #define a descriptive name for the streamfile
+    fileName = "binary-" + \
+    "hfw-" + str(hfw) + "-" +\
+    "dStep-" + str(dStep) + "-" +\
+    "dwellTime-" + str(dwellTime) + "-" +\
+    "passNumber-" + str(passNumber) + ".str"
+    fileLoc = saveFolder + fileName
 
-#     for streamName in streamNameList:
+    #correcting units for prebuilt functions
+    millDens = 1 / dStep
+    #determining how many pixels to use from user defined quantities and streamfile pixel counts
+    nPixels = int((gratLength / hfw) * xdirStreamPixels)
 
-#         #this tells the FIB to load a streamfile into memory
-#         streamline = "patternfile " + streamName + "\n"
-#         f.write(streamline)
-#         #this line tells the FIB to mill the currently loaded streamfile
-#         f.write("mill\n")
-        
-#     print("all done!")
-    
-    
+    #generate coordinates upon which we will do our modeling
+    xcoordArr,ycoordArr = ggen.generateCoordinates(gratLength,gratLength,nPixels,nPixels)
+    #define the grating as a numpy array
+    gratingArr = ggen.oneDimensionBinary(xcoordArr,depth=1,period=gratPeriod,duty=1)
+    #convert some units
+    millArrDens, lengthStream = streamConversions(hfw,millDens,gratLength,nPixels)
+    #define the streamfile points
+    streamArray = binaryStreamGen(gratingArr,millArrDens,millArrDens,lengthStream,lengthStream)
+    #generate a streamfile
+    generateStreamFile(streamArray,passNumber,dwellTime,fileLoc)
+
+
+
 def streamConversions(hfw,millDens,gratingLength,calcRes,yDir = False):
     """
     hfw: Half Field Width in microns
@@ -326,3 +350,22 @@ def streamGridSplit(streamArray,spacingWidthRatio,spacingHeightRatio,streamLengt
             plt.scatter(chunkArr4[:,0],chunkArr4[:,1],s = .1,color=next(colors))
 
     return chunklist
+
+
+# #this function takes a list of streamfile names all within the same folder
+# #and it writes an autoscript file to run all the streamfiles in order
+#useless since we can't use autoscripts on fib2 without some expensive software
+# def basicAutoscript(streamNameList,fileLoc):
+    
+#     f = open(fileLoc,"w+")
+
+#     for streamName in streamNameList:
+
+#         #this tells the FIB to load a streamfile into memory
+#         streamline = "patternfile " + streamName + "\n"
+#         f.write(streamline)
+#         #this line tells the FIB to mill the currently loaded streamfile
+#         f.write("mill\n")
+        
+#     print("all done!")
+    
