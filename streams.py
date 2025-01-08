@@ -171,6 +171,18 @@ def binaryGratingStreamfile(hfw, dwellTime, passNumber, dStep,\
     #generate a streamfile
     generateStreamFile(streamArray,passNumber,dwellTime,fileLoc)
 
+#function that takes in the high and low values of FIB parameters and generates streamfiles
+#which contain every combination of those parameters
+def factorialBinaryGratingStreamfiles(hfw, dwellTimeHigh, passNumberHigh, dStepHigh,\
+                              dwellTimeLow, passNumberLow, dStepLow,\
+                              gratPeriod, gratLength, saveFolder):
+    
+    for dwellTime in [dwellTimeLow,dwellTimeHigh]:
+        for passNumber in [passNumberLow,passNumberHigh]:
+            for dStep in [dStepLow, dStepHigh]:
+                binaryGratingStreamfile(hfw,dwellTime,passNumber,dStep,\
+                                           gratPeriod,gratLength,saveFolder)
+
 
 
 def streamConversions(hfw,millDens,gratingLength,calcRes,yDir = False):
