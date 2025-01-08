@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
 
-import grating_generation as ggen
+from . import grating_generation as ggen
 
 ## STREAM FILE FORMATTING
 # beam_con 1 for beam on, 0 for beam off, nothing for don't change beam_con
