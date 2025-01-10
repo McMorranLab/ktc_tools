@@ -90,21 +90,51 @@ def plotStreams(streamArray,zoom = False):
     xmax = streamArray[-1][0]
     ymax = streamArray[-1][1]
     
-    plt.scatter(streamArray[:,0],streamArray[:,1], s=0.1)
+    fig, ax = plt.subplots()
+    ax.scatter(streamArray[:,0],streamArray[:,1], s=0.1)
 
     #here we isolate only the points that the beam is turned off for
     #and plot those with red
     Boolarr = streamArray[:,2] == 0
     beamarr = streamArray[Boolarr]
     
-    plt.scatter(beamarr[:,0], beamarr[:,1],s = 1, c='red')
+    ax.scatter(beamarr[:,0], beamarr[:,1],s = 1, c='red')
     
     if zoom:
         plt.gca().set_xlim(xmax * .8, xmax)  # Adjust the range according to your data
         plt.gca().set_ylim(ymax * .8, ymax) 
 
     plt.show()
+    #for figure saving purposes 
+    return ax
     
+#function that takes in a streamfile location, unpacks the streamfile into
+#a numpy array, then plots the resulting numpy array, optional to enter 
+#a location that the plotted streamfile is saved
+def streamFileReader(fileLocation,savePlotLocation = None):
+    f = open(fileLocation,"r")
+
+    counter = 0
+    #loop through all the lines in the streamfile
+    for line in f:
+        counter += 1
+
+        #skip the first few lines with rnadom information
+        if counter <=3:
+            print(line)
+            continue
+
+        #make first line numpy array
+        if counter == 4:
+            streamfileArray = np.array(line.split())[1:4].astype(float)
+
+        streamfileArray = np.vstack([streamfileArray, np.array(line.split())[1:4].astype(float)])
+
+    plot = st.plotStreams(streamfileArray,zoom = False)
+    #If the user enters a saveLocation save the plot there
+    #else do nothing with the plot
+    if savePlotLocation != None:
+        plot.figure.savefig(savePlotLocation)
 
 #take the stream array and the necessary parameters and generate a stream file format
 #the dwell time is in units of .1 microseconds
