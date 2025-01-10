@@ -158,7 +158,7 @@ def binaryGratingStreamfile(hfw, dwellTime, passNumber, dStep,\
     #correcting units for prebuilt functions
     millDens = 1 / dStep
     #determining how many pixels to use from user defined quantities and streamfile pixel counts
-    nPixels = int((gratLength / (hfw*2)) * xdirStreamPixels)
+    nPixels = int((gratLength / hfw) * xdirStreamPixels)
 
     #generate coordinates upon which we will do our modeling
     xcoordArr,ycoordArr = ggen.generateCoordinates(gratLength,gratLength,nPixels,nPixels)
