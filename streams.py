@@ -130,7 +130,7 @@ def streamFileReader(fileLocation,savePlotLocation = None):
 
         streamfileArray = np.vstack([streamfileArray, np.array(line.split())[1:4].astype(float)])
 
-    plot = st.plotStreams(streamfileArray,zoom = False)
+    plot = plotStreams(streamfileArray,zoom = False)
     #If the user enters a saveLocation save the plot there
     #else do nothing with the plot
     if savePlotLocation != None:
