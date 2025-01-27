@@ -181,8 +181,11 @@ def binaryGratingStreamfile(hfw, dwellTime, passNumber, dStep,\
     fileName = "binary-" + \
     "hfw-" + str(hfw) + "-" +\
     "dStep-" + str(dStep) + "-" +\
-    "dwellTime-" + str(dwellTime) + "-" +\
-    "passNumber-" + str(passNumber) + ".str"
+    "dwellTime-" + str(dwellTime /10) + "-" +\
+    "passNumber-" + str(passNumber) + +\
+    "period-" + str(gratPeriod) +\
+    "length-" + str(gratLength) + ".str"
+    
     fileLoc = saveFolder + fileName
 
     #correcting units for prebuilt functions
