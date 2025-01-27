@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from matplotlib import pyplot as plt
 import matplotlib.cm as cm
 
@@ -110,7 +111,10 @@ def plotStreams(streamArray,zoom = False):
     
 #function that takes in a streamfile location, unpacks the streamfile into
 #a numpy array, then plots the resulting numpy array, optional to enter 
-#a location that the plotted streamfile is saved
+#a location that the plotted streamfile is saved. For larger streamfiles
+#this is a very slow process. The slowest part is reading a streamfile into a 
+#stream array so if you can plot before you get rid of your original stream array
+#that is optimal
 def streamFileReader(fileLocation,savePlotLocation = None):
     f = open(fileLocation,"r")
 
@@ -165,7 +169,7 @@ def generateStreamFile(streamArray,numPasses,dwellTime,fileLoc):
 
 #function that takes in FIB parameters for a binary grating and generates a streamfile
 def binaryGratingStreamfile(hfw, dwellTime, passNumber, dStep,\
-                        gratPeriod, gratLength, saveFolder):
+                        gratPeriod, gratLength, saveFolder,savePlot = False):
     """
     hfw: the half field width milling should happen at in microns
     dwellTime: the dwellTime to use for each point
@@ -175,6 +179,7 @@ def binaryGratingStreamfile(hfw, dwellTime, passNumber, dStep,\
     gratLength: the size of the grating to be made in microns
     saveFolder: the location you wish to save the streamfile in ending in a backslash so 
         that it may be added to the automatically generated file name
+    savePlot: Binary toggle to decide if we save plots of the streamfiles or not
     """
     
     #define a descriptive name for the streamfile
@@ -187,6 +192,8 @@ def binaryGratingStreamfile(hfw, dwellTime, passNumber, dStep,\
     "length-" + str(gratLength) + ".str"
     
     fileLoc = saveFolder + fileName
+    #construct file name for saved plot of streamfile
+    plotLoc = os.path.splitext(fileLoc)[0] + ".png"
 
     #correcting units for prebuilt functions
     millDens = 1 / dStep
@@ -204,6 +211,11 @@ def binaryGratingStreamfile(hfw, dwellTime, passNumber, dStep,\
     #generate a streamfile
     generateStreamFile(streamArray,passNumber,dwellTime,fileLoc)
 
+    #plot the streamfile and save it to a location
+    plot = plotStreams(streamArray,zoom = False)
+    if savePlot:
+        plot.figure.savefig(plotLoc)
+
 #function that takes in the high and low values of FIB parameters and generates streamfiles
 #which contain every combination of those parameters
 def factorialBinaryGratingStreamfiles(hfw, dwellTimeHigh, passNumberHigh, dStepHigh,\
@@ -214,9 +226,8 @@ def factorialBinaryGratingStreamfiles(hfw, dwellTimeHigh, passNumberHigh, dStepH
         for passNumber in [passNumberLow,passNumberHigh]:
             for dStep in [dStepLow, dStepHigh]:
                 binaryGratingStreamfile(hfw,dwellTime,passNumber,dStep,\
-                                           gratPeriod,gratLength,saveFolder)
-
-
+                                           gratPeriod,gratLength,saveFolder,\
+                                            savePlot = True)
 
 def streamConversions(hfw,millDens,gratingLength,calcRes,yDir = False):
     """
