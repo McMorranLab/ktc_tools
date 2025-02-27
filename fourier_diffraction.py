@@ -269,6 +269,50 @@ def rescaleArray(targetSizeArray,transformArray):
     rescaledArray = scipy.ndimage.zoom(transformArray,zoomFactor)
     return rescaledArray
 
+#function to simulate a two grating interferometry setup
+def twoGratingInterferometry(grating1,grating2,gratingLength,acceleratingVoltage):
+    """
+    grating1: 2d numpy array representing the first grating in the interferometer
+    grating2: 2d numpy array representing the second grating in the interferometer
+    gratingLength: float representing the length of the grating in microns
+    acceleratingVoltage: float representing the accelerating voltage to be used in the experiment
+    """
+    
+    #do the whole IFM model
+    #this should be the wavefunction of the electron directly after the first grating
+    psi1 = fd.postHoloWaveFunc(grating1, acceleratingVoltage)
+
+    #apply the circular aperature
+    psi1  = fd.circleAperture(psi1,rfrac = .4)
+    #normalize to save from rounding errors
+    psi1Norm = fd.normalizeWavefunc(psi1)
+    #propogate that wavefunction down to  L1
+    L1 = fd.fourierPropogateDumb(psi1Norm,wavefunc = True, pad = 0)
+
+    #find and plot the beam efficiencies at the L1 plane
+    xax, L1beams = fd.calcDiffractionEfficiencies(np.abs(L1)**2, gratingLength)
+    #apply an aperature that isolates the two beams
+    L1aperture = fd.twoBeamAperture(L1beams, L1)
+
+    #propogate the aperture 
+    beamFactor = fd.fourierPropogateDumb(L1aperture,wavefunc = True,pad = 0)
+    beamTrans = 0
+    transBeamFac = np.roll(beamFactor,beamTrans,axis = 1)
+    beamFactor = transBeamFac
+    #apply the second grating
+    holoFactor = fd.postHoloWaveFunc(grating2,acceleratingVoltage)
+
+    L2 = holoFactor * beamFactor
+    #propogate one more time to get to the detector plane
+    L3 = fd.fourierPropogateDumb(L2,wavefunc = True,pad = 0)
+    #normalize the wavefunction
+    L3norm = fd.normalizeWavefunc(L3)
+    # L3norm = np.fft.fftshift(L3norm)
+    intensity = np.abs(L3norm)**2
+
+    #return the intensity as observed on the detector
+    return intensity
+
 
 # #I don't trust this function any more
 # #dont use until it is heavily inspected
