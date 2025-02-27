@@ -21,6 +21,12 @@ meanInnPot = 15 #Volts
 #grating parameters
 membraneThickness = 50*10**-9
 
+#simple function for calculating the electron wavelength
+def calcWavelength(acceleratingVoltage):
+    
+    krel = (1 / (hbar*c)) * np.sqrt(acceleratingVoltage**2 + 2*acceleratingVoltage*me) # 1 / meters #wave number of the electron
+    return 2*np.pi / krel
+
 #calculating the sigma parameter which stands for the interaction 
 #parameter in CWJ thesis
 def calcSigmaUmip(kineticEnergy = 80*10**3):
@@ -288,12 +294,15 @@ def singleGratingDiffraction(grating,acceleratingVoltage):
     return diffraction
 
 #function to simulate a two grating interferometry setup
-def twoGratingInterferometry(grating1,grating2,gratingLength,acceleratingVoltage):
+def twoGratingInterferometry(grating1,grating2,gratingLength,acceleratingVoltage, sampleArray = 1):
     """
     grating1: 2d numpy array representing the first grating in the interferometer
     grating2: 2d numpy array representing the second grating in the interferometer
     gratingLength: float representing the length of the grating in microns
     acceleratingVoltage: float representing the accelerating voltage to be used in the experiment
+    sampleArray: 2d numpy array representing the effect of a sample upon the first gratings probe beams
+                0 represents blocking 1 represents perfect transmittance and e^(i*phase) represents a phase
+                shift introduced to the beams this can be shaped to be applied to one or both probe beams
     """
 
     #do the whole IFM model
@@ -312,8 +321,11 @@ def twoGratingInterferometry(grating1,grating2,gratingLength,acceleratingVoltage
     #apply an aperature that isolates the two beams
     L1aperture = twoBeamAperture(L1beams, L1)
 
+    #apply the effect of the sample
+    L1sample = L1aperture * sampleArray
+
     #propogate the aperture 
-    beamFactor = fourierPropogateDumb(L1aperture,wavefunc = True,pad = 0)
+    beamFactor = fourierPropogateDumb(L1sample,wavefunc = True,pad = 0)
     beamTrans = 0
     transBeamFac = np.roll(beamFactor,beamTrans,axis = 1)
     beamFactor = transBeamFac
@@ -330,27 +342,3 @@ def twoGratingInterferometry(grating1,grating2,gratingLength,acceleratingVoltage
 
     #return the intensity as observed on the detector
     return intensity
-
-
-
-
-# #I don't trust this function any more
-# #dont use until it is heavily inspected
-# def fourierPropogate(grating,zval):
-#     #Defining the transmission function
-#     cConst = 2*np.pi * (KE + me) / ((wavelength * accVoltage)*(KE + 2*me))
-#     ktwiddle = cConst * meanInnPot + 1.0j * alphaDecay
-
-#     transFunc = np.exp(grating * 1.0j * ktwiddle)
-#     #padding because that is what the old gods requested
-#     padlength = int(transFunc.shape[0] * .1)
-#     transFunc = np.pad(transFunc, [padlength, padlength], mode='constant', constant_values=0)
-
-#     #find fourier transform of transmission function, now (0,0) is at center of grid in frequency space
-#     fourierTrans = np.fft.fftshift(np.fft.fft2(transFunc))
-    
-#     #do some transformations to get back into real space
-    # wavefunc = (2*np.pi)**2 * np.exp(1.0j * krel * zval) * fourierTrans / (1.0j * wavelength * zval)
-    # intensity = np.abs(wavefunc)**2
-    
-    # return intensity
