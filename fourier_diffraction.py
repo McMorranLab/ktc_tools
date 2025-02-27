@@ -277,13 +277,13 @@ def singleGratingDiffraction(grating,acceleratingVoltage):
     """
 
     #compute the effects of the grating
-    g1psi1 = fd.postHoloWaveFunc(grating,acceleratingVoltage)
+    g1psi1 = postHoloWaveFunc(grating,acceleratingVoltage)
     #add a circular aperature
-    g1psi1Ap = fd.circleAperture(g1psi1,rfrac = .4)
+    g1psi1Ap = circleAperture(g1psi1,rfrac = .4)
     #normalize cuz why not
-    g1psi1Norm = fd.normalizeWavefunc(g1psi1Ap)
+    g1psi1Norm = normalizeWavefunc(g1psi1Ap)
     #use fourier transforms to propagate the wavefunction down the column
-    diffraction = fd.fourierPropogateDumb(g1psi1Norm,wavefunc = True,pad = 0)
+    diffraction = fourierPropogateDumb(g1psi1Norm,wavefunc = True,pad = 0)
     #give the resulting diffraction pattern back
     return diffraction
 
@@ -298,33 +298,33 @@ def twoGratingInterferometry(grating1,grating2,gratingLength,acceleratingVoltage
 
     #do the whole IFM model
     #this should be the wavefunction of the electron directly after the first grating
-    psi1 = fd.postHoloWaveFunc(grating1, acceleratingVoltage)
+    psi1 = postHoloWaveFunc(grating1, acceleratingVoltage)
 
     #apply the circular aperature
-    psi1  = fd.circleAperture(psi1,rfrac = .4)
+    psi1  = circleAperture(psi1,rfrac = .4)
     #normalize to save from rounding errors
-    psi1Norm = fd.normalizeWavefunc(psi1)
+    psi1Norm = normalizeWavefunc(psi1)
     #propogate that wavefunction down to  L1
-    L1 = fd.fourierPropogateDumb(psi1Norm,wavefunc = True, pad = 0)
+    L1 = fourierPropogateDumb(psi1Norm,wavefunc = True, pad = 0)
 
     #find and plot the beam efficiencies at the L1 plane
-    xax, L1beams = fd.calcDiffractionEfficiencies(np.abs(L1)**2, gratingLength)
+    xax, L1beams = calcDiffractionEfficiencies(np.abs(L1)**2, gratingLength)
     #apply an aperature that isolates the two beams
-    L1aperture = fd.twoBeamAperture(L1beams, L1)
+    L1aperture = twoBeamAperture(L1beams, L1)
 
     #propogate the aperture 
-    beamFactor = fd.fourierPropogateDumb(L1aperture,wavefunc = True,pad = 0)
+    beamFactor = fourierPropogateDumb(L1aperture,wavefunc = True,pad = 0)
     beamTrans = 0
     transBeamFac = np.roll(beamFactor,beamTrans,axis = 1)
     beamFactor = transBeamFac
     #apply the second grating
-    holoFactor = fd.postHoloWaveFunc(grating2,acceleratingVoltage)
+    holoFactor = postHoloWaveFunc(grating2,acceleratingVoltage)
 
     L2 = holoFactor * beamFactor
     #propogate one more time to get to the detector plane
-    L3 = fd.fourierPropogateDumb(L2,wavefunc = True,pad = 0)
+    L3 = fourierPropogateDumb(L2,wavefunc = True,pad = 0)
     #normalize the wavefunction
-    L3norm = fd.normalizeWavefunc(L3)
+    L3norm = normalizeWavefunc(L3)
     # L3norm = np.fft.fftshift(L3norm)
     intensity = np.abs(L3norm)**2
 
