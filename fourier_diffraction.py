@@ -269,6 +269,24 @@ def rescaleArray(targetSizeArray,transformArray):
     rescaledArray = scipy.ndimage.zoom(transformArray,zoomFactor)
     return rescaledArray
 
+#Function to predict the intensity from a single grating diffraction experiment
+def singleGratingDiffraction(grating,acceleratingVoltage):
+    """
+    grating: 2d numpy array describing the grating
+    acceleratingVoltage: float for the accelerating voltage in eV
+    """
+
+    #compute the effects of the grating
+    g1psi1 = fd.postHoloWaveFunc(grating,acceleratingVoltage)
+    #add a circular aperature
+    g1psi1Ap = fd.circleAperture(g1psi1,rfrac = .4)
+    #normalize cuz why not
+    g1psi1Norm = fd.normalizeWavefunc(g1psi1Ap)
+    #use fourier transforms to propagate the wavefunction down the column
+    diffraction = fd.fourierPropogateDumb(g1psi1Norm,wavefunc = True,pad = 0)
+    #give the resulting diffraction pattern back
+    return diffraction
+
 #function to simulate a two grating interferometry setup
 def twoGratingInterferometry(grating1,grating2,gratingLength,acceleratingVoltage):
     """
@@ -277,7 +295,7 @@ def twoGratingInterferometry(grating1,grating2,gratingLength,acceleratingVoltage
     gratingLength: float representing the length of the grating in microns
     acceleratingVoltage: float representing the accelerating voltage to be used in the experiment
     """
-    
+
     #do the whole IFM model
     #this should be the wavefunction of the electron directly after the first grating
     psi1 = fd.postHoloWaveFunc(grating1, acceleratingVoltage)
@@ -312,6 +330,8 @@ def twoGratingInterferometry(grating1,grating2,gratingLength,acceleratingVoltage
 
     #return the intensity as observed on the detector
     return intensity
+
+
 
 
 # #I don't trust this function any more
