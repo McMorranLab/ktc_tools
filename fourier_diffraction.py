@@ -112,16 +112,16 @@ def gratingCoefficients(xarr,gratingArr,period,accVoltage,nmax):
         
     return coefList
 
-def twoBeamAperture(efficiencyArr,waveFuncArr):
-    #if your grating has been optimized for two beam diffraction, then the two 
-    #beams should have efficiencies of at least .2, and be the only beams with 
-    #values greater than .2
-    locArr,heightArr = scipy.signal.find_peaks(efficiencyArr,height = .1)
-    locArr = np.sort(locArr)
-    beamSeparation = locArr[1] - locArr[0]
+def twoBeamAperture(beam1Index,beam2Index,beamSeparation,waveFuncArr):
+    #outside the function find the seperation between the beams and their indices
+
     #define the edges of our aperature based on beam location and separation
-    rightEdge = round(locArr[1] + beamSeparation/2)
-    leftEdge = round(locArr[0] - beamSeparation/2)
+    if beam1Index > beam2Index:
+        rightEdge = round(beam1Index + beamSeparation/2)
+        leftEdge = round(beam2Index - beamSeparation/2)
+    else: 
+        rightEdge = round(beam2Index + beamSeparation/2)
+        leftEdge = round(beam1Index - beamSeparation/2)
     waveFuncArr[:,rightEdge:] = 0
     waveFuncArr[:,:leftEdge] = 0
     
@@ -261,6 +261,7 @@ def gratingCoefficientsFFT(function1d,pixPerPeriod):
 
     return orderCoefficients, orderLabels
 
+
 def normalizeWavefunc(wavefunc):
     magnitude = np.abs(wavefunc)**2
     normFactor = np.sqrt(np.sum(magnitude))
@@ -294,15 +295,19 @@ def singleGratingDiffraction(grating,acceleratingVoltage):
     return diffraction
 
 #function to simulate a two grating interferometry setup
-def twoGratingInterferometry(grating1,grating2,gratingLength,acceleratingVoltage, sampleArray = 1):
+def twoGratingInterferometry(grating1,grating2,acceleratingVoltage,G1orderIndices,G1orderLabels,sampleArray = 1):
     """
     grating1: 2d numpy array representing the first grating in the interferometer
     grating2: 2d numpy array representing the second grating in the interferometer
-    gratingLength: float representing the length of the grating in microns
     acceleratingVoltage: float representing the accelerating voltage to be used in the experiment
+    G1orderIndices: calculated from the way the gratings are defined; an array of the indices where each
+                    diffraction peak occures
+    G1orderLabels: calculated from the way the gratings are defined; an array with the integer corresponding
+                    to the diffraction order at each index in the above array
     sampleArray: 2d numpy array representing the effect of a sample upon the first gratings probe beams
                 0 represents blocking 1 represents perfect transmittance and e^(i*phase) represents a phase
                 shift introduced to the beams this can be shaped to be applied to one or both probe beams
+
     """
 
     #do the whole IFM model
@@ -316,10 +321,12 @@ def twoGratingInterferometry(grating1,grating2,gratingLength,acceleratingVoltage
     #propogate that wavefunction down to  L1
     L1 = fourierPropogateDumb(psi1Norm,wavefunc = True, pad = 0)
 
-    #find and plot the beam efficiencies at the L1 plane
-    xax, L1beams = calcDiffractionEfficiencies(np.abs(L1)**2, gratingLength)
-    #apply an aperature that isolates the two beams
-    L1aperture = twoBeamAperture(L1beams, L1)
+    #find the array index where the 0 and +1 probes are located
+    G1order0index = G1orderIndices[list(G1orderLabels).index(0)]
+    G1order1index = G1orderIndices[list(G1orderLabels).index(1)]
+    #calculate the distance between the 0 and +1 probe so they may be isolated
+    G1probeBeamSeperation = np.abs(G1order0index - G1order1index)
+    L1aperture = twoBeamAperture(G1order0index,G1order1index,G1probeBeamSeperation, L1)
 
     #apply the effect of the sample
     L1sample = L1aperture * sampleArray
