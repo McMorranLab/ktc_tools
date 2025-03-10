@@ -295,7 +295,8 @@ def singleGratingDiffraction(grating,acceleratingVoltage):
     return diffraction
 
 #function to simulate a two grating interferometry setup
-def twoGratingInterferometry(grating1,grating2,acceleratingVoltage,G1orderIndices,G1orderLabels,sampleArray = 1):
+def twoGratingInterferometry(grating1,grating2,acceleratingVoltage,G1orderIndices,G1orderLabels\
+                             ,sampleArray = 1,customAperture = None):
     """
     grating1: 2d numpy array representing the first grating in the interferometer
     grating2: 2d numpy array representing the second grating in the interferometer
@@ -307,7 +308,9 @@ def twoGratingInterferometry(grating1,grating2,acceleratingVoltage,G1orderIndice
     sampleArray: 2d numpy array representing the effect of a sample upon the first gratings probe beams
                 0 represents blocking 1 represents perfect transmittance and e^(i*phase) represents a phase
                 shift introduced to the beams this can be shaped to be applied to one or both probe beams
-
+    customAperture: a 2d numpy array representing the aperture that should be placed to isolate beams from G1,
+                    1 represents transmission through vacuum and 0 represents perfect blocking of the beams at
+                    a given array index
     """
 
     #do the whole IFM model
@@ -321,12 +324,16 @@ def twoGratingInterferometry(grating1,grating2,acceleratingVoltage,G1orderIndice
     #propogate that wavefunction down to  L1
     L1 = fourierPropogateDumb(psi1Norm,wavefunc = True, pad = 0)
 
-    #find the array index where the 0 and +1 probes are located
-    G1order0index = G1orderIndices[list(G1orderLabels).index(0)]
-    G1order1index = G1orderIndices[list(G1orderLabels).index(1)]
-    #calculate the distance between the 0 and +1 probe so they may be isolated
-    G1probeBeamSeperation = np.abs(G1order0index - G1order1index)
-    L1aperture = twoBeamAperture(G1order0index,G1order1index,G1probeBeamSeperation, L1)
+    #in the case that no aperture is specified default to a simple 2 beam aperture isolating 0 and 1
+    if customAperture == None:
+        #find the array index where the 0 and +1 probes are located
+        G1order0index = G1orderIndices[list(G1orderLabels).index(0)]
+        G1order1index = G1orderIndices[list(G1orderLabels).index(1)]
+        #calculate the distance between the 0 and +1 probe so they may be isolated
+        G1probeBeamSeperation = np.abs(G1order0index - G1order1index)
+        L1aperture = twoBeamAperture(G1order0index,G1order1index,G1probeBeamSeperation, L1)
+    else:
+        L1aperture = customAperture
 
     #apply the effect of the sample
     L1sample = L1aperture * sampleArray
