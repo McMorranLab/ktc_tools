@@ -21,6 +21,12 @@ meanInnPot = 15 #Volts
 #grating parameters
 membraneThickness = 50*10**-9
 
+#simple function for calculating the electron wavelength
+def calcWavelength(acceleratingVoltage):
+    
+    krel = (1 / (hbar*c)) * np.sqrt(acceleratingVoltage**2 + 2*acceleratingVoltage*me) # 1 / meters #wave number of the electron
+    return 2*np.pi / krel
+
 #calculating the sigma parameter which stands for the interaction 
 #parameter in CWJ thesis
 def calcSigmaUmip(kineticEnergy = 80*10**3):
@@ -106,16 +112,16 @@ def gratingCoefficients(xarr,gratingArr,period,accVoltage,nmax):
         
     return coefList
 
-def twoBeamAperture(efficiencyArr,waveFuncArr):
-    #if your grating has been optimized for two beam diffraction, then the two 
-    #beams should have efficiencies of at least .2, and be the only beams with 
-    #values greater than .2
-    locArr,heightArr = scipy.signal.find_peaks(efficiencyArr,height = .1)
-    locArr = np.sort(locArr)
-    beamSeparation = locArr[1] - locArr[0]
+def twoBeamAperture(beam1Index,beam2Index,beamSeparation,waveFuncArr):
+    #outside the function find the seperation between the beams and their indices
+
     #define the edges of our aperature based on beam location and separation
-    rightEdge = round(locArr[1] + beamSeparation/2)
-    leftEdge = round(locArr[0] - beamSeparation/2)
+    if beam1Index > beam2Index:
+        rightEdge = round(beam1Index + beamSeparation/2)
+        leftEdge = round(beam2Index - beamSeparation/2)
+    else: 
+        rightEdge = round(beam2Index + beamSeparation/2)
+        leftEdge = round(beam1Index - beamSeparation/2)
     waveFuncArr[:,rightEdge:] = 0
     waveFuncArr[:,:leftEdge] = 0
     
@@ -255,6 +261,7 @@ def gratingCoefficientsFFT(function1d,pixPerPeriod):
 
     return orderCoefficients, orderLabels
 
+
 def normalizeWavefunc(wavefunc):
     magnitude = np.abs(wavefunc)**2
     normFactor = np.sqrt(np.sum(magnitude))
@@ -269,24 +276,83 @@ def rescaleArray(targetSizeArray,transformArray):
     rescaledArray = scipy.ndimage.zoom(transformArray,zoomFactor)
     return rescaledArray
 
+#Function to predict the intensity from a single grating diffraction experiment
+def singleGratingDiffraction(grating,acceleratingVoltage):
+    """
+    grating: 2d numpy array describing the grating
+    acceleratingVoltage: float for the accelerating voltage in eV
+    """
 
-# #I don't trust this function any more
-# #dont use until it is heavily inspected
-# def fourierPropogate(grating,zval):
-#     #Defining the transmission function
-#     cConst = 2*np.pi * (KE + me) / ((wavelength * accVoltage)*(KE + 2*me))
-#     ktwiddle = cConst * meanInnPot + 1.0j * alphaDecay
+    #compute the effects of the grating
+    g1psi1 = postHoloWaveFunc(grating,acceleratingVoltage)
+    #add a circular aperature
+    g1psi1Ap = circleAperture(g1psi1,rfrac = .4)
+    #normalize cuz why not
+    g1psi1Norm = normalizeWavefunc(g1psi1Ap)
+    #use fourier transforms to propagate the wavefunction down the column
+    diffraction = fourierPropogateDumb(g1psi1Norm,wavefunc = True,pad = 0)
+    #give the resulting diffraction pattern back
+    return diffraction
 
-#     transFunc = np.exp(grating * 1.0j * ktwiddle)
-#     #padding because that is what the old gods requested
-#     padlength = int(transFunc.shape[0] * .1)
-#     transFunc = np.pad(transFunc, [padlength, padlength], mode='constant', constant_values=0)
+#function to simulate a two grating interferometry setup
+def twoGratingInterferometry(grating1,grating2,acceleratingVoltage,G1orderIndices,G1orderLabels\
+                             ,sampleArray = 1,customAperture = None):
+    """
+    grating1: 2d numpy array representing the first grating in the interferometer
+    grating2: 2d numpy array representing the second grating in the interferometer
+    acceleratingVoltage: float representing the accelerating voltage to be used in the experiment
+    G1orderIndices: calculated from the way the gratings are defined; an array of the indices where each
+                    diffraction peak occures
+    G1orderLabels: calculated from the way the gratings are defined; an array with the integer corresponding
+                    to the diffraction order at each index in the above array
+    sampleArray: 2d numpy array representing the effect of a sample upon the first gratings probe beams
+                0 represents blocking 1 represents perfect transmittance and e^(i*phase) represents a phase
+                shift introduced to the beams this can be shaped to be applied to one or both probe beams
+    customAperture: a 2d numpy array representing the aperture that should be placed to isolate beams from G1,
+                    1 represents transmission through vacuum and 0 represents perfect blocking of the beams at
+                    a given array index
+    """
 
-#     #find fourier transform of transmission function, now (0,0) is at center of grid in frequency space
-#     fourierTrans = np.fft.fftshift(np.fft.fft2(transFunc))
-    
-#     #do some transformations to get back into real space
-    # wavefunc = (2*np.pi)**2 * np.exp(1.0j * krel * zval) * fourierTrans / (1.0j * wavelength * zval)
-    # intensity = np.abs(wavefunc)**2
-    
-    # return intensity
+    #do the whole IFM model
+    #this should be the wavefunction of the electron directly after the first grating
+    psi1 = postHoloWaveFunc(grating1, acceleratingVoltage)
+
+    #apply the circular aperature
+    psi1  = circleAperture(psi1,rfrac = .4)
+    #normalize to save from rounding errors
+    psi1Norm = normalizeWavefunc(psi1)
+    #propogate that wavefunction down to  L1
+    L1 = fourierPropogateDumb(psi1Norm,wavefunc = True, pad = 0)
+
+    #in the case that no aperture is specified default to a simple 2 beam aperture isolating 0 and 1
+    if customAperture == None:
+        #find the array index where the 0 and +1 probes are located
+        G1order0index = G1orderIndices[list(G1orderLabels).index(0)]
+        G1order1index = G1orderIndices[list(G1orderLabels).index(1)]
+        #calculate the distance between the 0 and +1 probe so they may be isolated
+        G1probeBeamSeperation = np.abs(G1order0index - G1order1index)
+        L1aperture = twoBeamAperture(G1order0index,G1order1index,G1probeBeamSeperation, L1)
+    else:
+        L1aperture = customAperture
+
+    #apply the effect of the sample
+    L1sample = L1aperture * sampleArray
+
+    #propogate the aperture 
+    beamFactor = fourierPropogateDumb(L1sample,wavefunc = True,pad = 0)
+    beamTrans = 0
+    transBeamFac = np.roll(beamFactor,beamTrans,axis = 1)
+    beamFactor = transBeamFac
+    #apply the second grating
+    holoFactor = postHoloWaveFunc(grating2,acceleratingVoltage)
+
+    L2 = holoFactor * beamFactor
+    #propogate one more time to get to the detector plane
+    L3 = fourierPropogateDumb(L2,wavefunc = True,pad = 0)
+    #normalize the wavefunction
+    L3norm = normalizeWavefunc(L3)
+    # L3norm = np.fft.fftshift(L3norm)
+    intensity = np.abs(L3norm)**2
+
+    #return the intensity as observed on the detector
+    return intensity
