@@ -1,4 +1,19 @@
+# ktc_tools
+
+Tools borrowed and create for use in academic research througout Kyle Cole's PhD research.
+
+streams.py - Module for generating streamfiles
+
+fourier_diffraction.py - Module for modeling diffraction in the far field regime with hologram gratings represented by numpy arrays
+
+grating_generation.py - Module for generating numpy arrays which represent hologram gratings
+
+diffractionEfficiencyCalculator.py - Code using fourier_diffraction.py and grating_generation.py to calculate the diffraction efficiency for a binary, or blazed grating (can easily add other kinds of gratings by modifying the inital code block)
+
+BinaryStreamFileGen.ipynb - Notebook demonstrating the basic workflow for generating streamfiles using the streams module and the grating_generation module
+
 # 2D Wave Simulation on the GPU
+https://github.com/0x23/WaveSimulator2D
 
 This repository contains a lightweight 2D wave simulator running on the GPU using CuPy library (probably requires a NVIDIA GPU). It can be used for 2D light and sound simulations.
 A simple visualizer shows the field and its intensity on the screen and writes a movie file for each to disks. The goal is to provide a fast, easy to use but still felxible wave simulator.
@@ -56,6 +71,7 @@ WARNING: Do not use anti-aliasing for the green channel ! The shades produced ar
 3. Open the folder as a Project using PyCharm
 4. If prompted to install requirements, accept (or install requirements using pip -r requirements.txt)
 5. Right click on one of the examples in wave_sim2d/examples and select run
+
 
 
 
