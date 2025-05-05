@@ -325,7 +325,7 @@ def twoGratingInterferometry(grating1,grating2,acceleratingVoltage,G1orderIndice
     L1 = fourierPropogateDumb(psi1Norm,wavefunc = True, pad = 0)
 
     #in the case that no aperture is specified default to a simple 2 beam aperture isolating 0 and 1
-    if customAperture == None:
+    if customAperture is None:
         #find the array index where the 0 and +1 probes are located
         G1order0index = G1orderIndices[list(G1orderLabels).index(0)]
         G1order1index = G1orderIndices[list(G1orderLabels).index(1)]
@@ -333,7 +333,7 @@ def twoGratingInterferometry(grating1,grating2,acceleratingVoltage,G1orderIndice
         G1probeBeamSeperation = np.abs(G1order0index - G1order1index)
         L1aperture = twoBeamAperture(G1order0index,G1order1index,G1probeBeamSeperation, L1)
     else:
-        L1aperture = customAperture
+        L1aperture = customAperture * L1
 
     #apply the effect of the sample
     L1sample = L1aperture * sampleArray

@@ -73,9 +73,14 @@ def oneDimensionArbitrary(xFunction,nx,periodPix,thickness,depth,period,otherPar
     print("array length in microns: ",length)
     #define a coordinate array for the x-axis
     xarr,yarr = generateCoordinates(length,length,nx,nx)
+    
+    #use otherParams or dont
+    if otherParams == []:
+        paramList = [thickness,depth,period]
+    else:
+        paramList = [thickness,depth,period] + otherParams
 
     #apply the function to the calculated x array
-    paramList = [thickness,depth,period]
     gratingArr = xFunction(xarr,paramList)
     
     return xarr, gratingArr
