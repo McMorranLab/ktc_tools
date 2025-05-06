@@ -1,0 +1,14 @@
+Lmod has detected the following error: The following module(s) are unknown:
+"miniconda"
+
+Please check the spelling or version number. Also try "module spider ..."
+It is also possible your cache file is out-of-date; it may help to try:
+  $ module --ignore_cache load "miniconda"
+
+Also make sure that all modulefiles written in TCL start with the string
+#%Module
+
+
+
+/home/kcole2/.conda/envs/WaveSimulator2D/lib/python3.13/site-packages/cupyx/jit/_interface.py:173: FutureWarning: cupyx.jit.rawkernel is experimental. The interface can change in the future.
+  cupy._util.experimental('cupyx.jit.rawkernel')

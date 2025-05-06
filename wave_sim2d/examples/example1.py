@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../'))  # noqa
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), '../'))
 
 import numpy as np
 import cv2
@@ -44,23 +44,29 @@ def main():
     simulator = sim.WaveSimulator2D(w, h, scene_objects)
     visualizer = vis.WaveVisualizer(field_colormap=field_colormap, intensity_colormap=intensity_colormap)
 
+    fps = 30
+    out = cv2.VideoWriter('output_video1.mp4', cv2.VideoWriter_fourcc('m','p','4','v'), fps, (w, h))
+    
     # run simulation
     for i in range(2000):
         simulator.update_scene()
         simulator.update_field()
         visualizer.update(simulator)
 
-        # visualize very N frames
-        if (i % 4) == 0:
-            # show field
-            frame_field = visualizer.render_field(1.0)
-            cv2.imshow("Wave Simulation Field", frame_field)
+        # show field
+        frame_field = visualizer.render_field(1.0)
+        # cv2.imshow("Wave Simulation Field", frame_field)
+        out.write(frame_field)
 
-            # show intensity
-            # frame_int = visualizer.render_intensity(1.0)
-            # cv2.imshow("Wave Simulation Intensity", frame_int)
+
+        # show intensity
+        # frame_int = visualizer.render_intensity(1.0)
+        # cv2.imshow("Wave Simulation Intensity", frame_int)
 
         cv2.waitKey(1)
+
+    out.release()
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../'))  # noqa
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), '../'))  # noqa
 
 import cv2
 import wave_sim2d.wave_visualizer as vis
@@ -29,6 +29,9 @@ def main():
     # build simulation scene
     scene_objects, w, h = build_scene()
 
+    fps = 10
+    out = cv2.VideoWriter('output_video0.mp4', cv2.VideoWriter_fourcc(*'XVID'), fps, (w, h))
+
     # create simulator and visualizer objects
     simulator = sim.WaveSimulator2D(w, h, scene_objects)
     visualizer = vis.WaveVisualizer(field_colormap=field_colormap, intensity_colormap=intensity_colormap)
@@ -41,13 +44,17 @@ def main():
 
         # show field
         frame_field = visualizer.render_field(1.0)
-        cv2.imshow("Wave Simulation Field", frame_field)
+        # cv2.imshow("Wave Simulation Field", frame_field)
+        out.write(frame_field)
 
         # show intensity
         # frame_int = visualizer.render_intensity(1.0)
         # cv2.imshow("Wave Simulation Intensity", frame_int)
 
         cv2.waitKey(1)
+
+    out.release()
+    cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
