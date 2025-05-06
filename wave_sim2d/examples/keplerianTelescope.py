@@ -71,14 +71,15 @@ def main():
 
     # create simulator and visualizer objects
     simulator = sim.WaveSimulator2D(w, h, scene_objects)
-    simulator.dt = .25
+    simulator.dt = .5
     visualizer = vis.WaveVisualizer(field_colormap=field_colormap, intensity_colormap=intensity_colormap)
 
     fps = 120
-    out = cv2.VideoWriter('keplerianTelescope.mp4', cv2.VideoWriter_fourcc('m','p','4','v'), fps, (w, h))
+    videoName = 'keplerianTelescope.mp4'
+    out = cv2.VideoWriter(videoName, cv2.VideoWriter_fourcc('m','p','4','v'), fps, (w, h))
 
     # run simulation
-    for i in range(6000):
+    for i in range(20000):
         simulator.update_scene()
         simulator.update_field()
 
@@ -88,7 +89,9 @@ def main():
         # cv2.imshow("Wave Simulation Field", frame_field)
         # show field
         frame_field = visualizer.render_field(1.0)
-        out.write(frame_field)
+
+        if (i % write_video_frame_every) == 0:
+            out.write(frame_field)
 
 
         # # show intensity
@@ -101,7 +104,5 @@ def main():
     out.release()
     cv2.destroyAllWindows()
 
-
-if __name__ == "__main__":
-    main()
+main()
 
