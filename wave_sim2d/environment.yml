@@ -1,0 +1,12 @@
+name: WaveSimulator2D
+
+channels:
+  - defaults
+  - conda-forge
+
+dependencies:
+  - python
+  - numpy=2.1
+  - opencv-python-headless
+  - matplotlib
+  - cupy
