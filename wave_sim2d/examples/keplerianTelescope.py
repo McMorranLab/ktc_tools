@@ -74,12 +74,12 @@ def main():
     simulator.dt = .5
     visualizer = vis.WaveVisualizer(field_colormap=field_colormap, intensity_colormap=intensity_colormap)
 
-    fps = 120
+    fps = 60
     videoName = 'keplerianTelescope.mp4'
     out = cv2.VideoWriter(videoName, cv2.VideoWriter_fourcc('m','p','4','v'), fps, (w, h))
 
     # run simulation
-    for i in range(20000):
+    for i in range(10000):
         simulator.update_scene()
         simulator.update_field()
 
@@ -90,8 +90,8 @@ def main():
         # show field
         frame_field = visualizer.render_field(1.0)
 
-        if (i % write_video_frame_every) == 0:
-            out.write(frame_field)
+        
+        out.write(frame_field)
 
 
         # # show intensity
