@@ -94,6 +94,56 @@ def optTrip(x,paramList):
     height = 1.211 #this depends on a and was found using desmos
     return thickness - depth * ((np.arctan(a * np.sin(x * np.pi * 2 / period)) + height) / (height*2))
 
+#abs value of a sin wave
+def magnitudeSin(x,paramList):
+    thickness = paramList[0]
+    depth = paramList[1]
+    period = paramList[2]
+
+    return thickness - (depth * np.abs(np.sin(x * np.pi / period)))
+
+# half-wave rectified sine wave
+def halfRectifiedSin(x,paramList):
+    thickness = paramList[0]
+    depth = paramList[1]
+    period = paramList[2]
+    
+    return thickness - (depth * np.where(np.sin(x * 2 * np.pi / period) > 0, np.sin(x * 2 * np.pi / period), 0))
+
+
+#optimum triplicator from Gori et al. 
+def optTrip(x,paramList):
+    thickness = paramList[0]
+    depth = paramList[1]
+    period = paramList[2]
+    
+    a = 2.65718
+    height = 1.211 #this depends on a and was found using desmos
+    return thickness - depth * ((np.arctan(a * np.sin(x * np.pi * 2 / period)) + height) / (height*2))
+
+def optDualBCS(x,paramList):
+    thickness = paramList[0]
+    depth = paramList[1]
+    period = paramList[2]
+    a = paramList[3]
+    
+    #extract values for caluclating new x axis
+    xmax = max(x[0,:])
+    n = len(x[0,:])
+    repetitions = round(xmax / period)
+    nPeriod = round(len(x[0,:]) / repetitions)
+    smoothingIndicies = np.arange(0,n,nPeriod)
+    #generate a new x axis to calculate y values so that their periodicity matches specified value
+    dummyX = np.linspace(0,2*np.pi,nPeriod)
+    newx = np.tile(dummyX,(n,repetitions))
+    #calculate y values over artificial x axis
+    thetaPeriod = np.arctan2(a * np.sin(newx) , 1 + a * np.cos(newx))
+    #bring the minimum value to 0 and the maximum value to 1
+    thetaNorm = (thetaPeriod - np.min(thetaPeriod)) / np.max(thetaPeriod - np.min(thetaPeriod))
+    #apply the thickness and depth as specified
+    thetaOut = thickness - depth * thetaNorm
+    return thetaOut
+
 #The mismatch of period, pixel number, and length, leads to beating in the modulus 
 #fixed in the new blazed grating function
 # #alternatively you could use fourier coefficients to define these grating profiles
