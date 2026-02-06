@@ -85,15 +85,6 @@ def oneDimensionArbitrary(xFunction,nx,periodPix,thickness,depth,period,otherPar
     
     return xarr, gratingArr
 
-def optTrip(x,paramList):
-    thickness = paramList[0]
-    depth = paramList[1]
-    period = paramList[2]
-    
-    a = 2.65718
-    height = 1.211 #this depends on a and was found using desmos
-    return thickness - depth * ((np.arctan(a * np.sin(x * np.pi * 2 / period)) + height) / (height*2))
-
 #abs value of a sin wave
 def magnitudeSin(x,paramList):
     thickness = paramList[0]
@@ -109,7 +100,6 @@ def halfRectifiedSin(x,paramList):
     period = paramList[2]
     
     return thickness - (depth * np.where(np.sin(x * 2 * np.pi / period) > 0, np.sin(x * 2 * np.pi / period), 0))
-
 
 #optimum triplicator from Gori et al. 
 def optTrip(x,paramList):

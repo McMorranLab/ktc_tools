@@ -27,6 +27,7 @@ def binaryStreamGen(hologram,xstride,ystride,xStreamfilePix,yStreamfilePix):
 
     xStartind = 0
     yStartind = 0
+
     
     xmax = hologram.shape[1]
     ymax = hologram.shape[0]
@@ -171,7 +172,7 @@ def generateStreamFile(streamArray,numPasses,dwellTime,fileLoc):
 def binaryGratingStreamfile(hfw, dwellTime, passNumber, dStep,\
                         gratPeriod, gratLength, saveFolder,savePlot = False):
     """
-    hfw: the half field width milling should happen at in microns
+    hfw: the horizontal field width milling should happen at in microns
     dwellTime: the dwellTime to use for each point
     passNumber: the number of milling passed that the streamfile will specify
     dStep: the distance between milling points in microns
